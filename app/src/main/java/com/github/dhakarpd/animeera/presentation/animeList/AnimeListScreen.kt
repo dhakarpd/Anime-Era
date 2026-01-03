@@ -2,8 +2,10 @@ package com.github.dhakarpd.animeera.presentation.animeList
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
+import com.github.dhakarpd.animeera.presentation.common.shimmer
 
 @Composable
 fun AnimeListScreen(
@@ -32,7 +35,7 @@ fun AnimeListScreen(
     onAnimeClick: (Int) -> Unit
 ) {
     val animeList = animeListScreenViewModel.animeList.collectAsState()
-    val syncStatus = animeListScreenViewModel.syncStatus.collectAsState(initial = SyncStatus.SYNCING)
+    val syncStatus = animeListScreenViewModel.syncStatus.collectAsState()
 
 //    println("Anime List: ${animeList.value}")
 //    println("Sync Status: ${syncStatus.value}")
@@ -56,8 +59,16 @@ fun AnimeListScreen(
             }
         }
         LazyColumn {
-            items(animeList.value) { anime ->
-                AnimeListItem(anime = anime, onClick = { onAnimeClick(anime.id) })
+            if (animeList.value.isNotEmpty()) {
+                items(animeList.value) { anime ->
+                    AnimeListItem(anime = anime, onClick = {
+                        onAnimeClick(anime.id)
+                    })
+                }
+            } else {
+                items(8) {
+                    AnimeListItemShimmer()
+                }
             }
         }
     }
@@ -96,6 +107,49 @@ fun AnimeListItem(
                 Text(
                     text = "Rating: ${anime.rating ?: "N/A"}",
                     style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimeListItemShimmer() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(end = 16.dp)
+                    .shimmer()
+            )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp)
+                        .shimmer()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(16.dp)
+                        .shimmer()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f)
+                        .height(16.dp)
+                        .shimmer()
                 )
             }
         }

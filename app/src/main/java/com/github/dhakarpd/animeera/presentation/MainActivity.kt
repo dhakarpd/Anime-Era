@@ -16,19 +16,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.github.dhakarpd.animeera.presentation.common.ObserveAsEvents
+import com.github.dhakarpd.animeera.presentation.common.SnackbarController
 import com.github.dhakarpd.animeera.presentation.common.shimmer
 import com.github.dhakarpd.animeera.presentation.navigation.Screen
 import com.github.dhakarpd.animeera.presentation.navigation.animeNavGraph
 import com.github.dhakarpd.animeera.ui.theme.AnimeEraTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,8 +46,44 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
+            val snackbarHostState = remember {
+                SnackbarHostState()
+            }
+            val scope = rememberCoroutineScope()
+            ObserveAsEvents(
+                flow = SnackbarController.events,
+                snackbarHostState
+            ) { event ->
+                scope.launch {
+                    // First dismiss any currently showing snackbar
+                    snackbarHostState.currentSnackbarData?.dismiss()
+
+                    val result = snackbarHostState.showSnackbar(
+                        message = event.message,
+                        actionLabel = event.action?.name,
+                        duration = SnackbarDuration.Short
+                    )
+
+                    if(result == SnackbarResult.ActionPerformed) {
+                        event.action?.action?.invoke()
+                    }
+                }
+            }
+
             AnimeEraTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                // Base composable as scaffold because we need a snackbar system
+                // which is able to show snackbar even when navigation is happening. To achieve that
+                // if base composable was NavHost then to show a snackbar we would have required a
+                // scaffold at each screen which would lead to no scaffold being there in hierarchy
+                // when navigation is happening. Hence we use base composable as scaffold.
+                Scaffold(
+                    snackbarHost = {
+                        SnackbarHost(
+                            hostState = snackbarHostState
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
 
                     NavHost(
                         navController = navController,

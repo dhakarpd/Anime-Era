@@ -13,6 +13,45 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+
+/**
+ * With time in every ~16ms the animation clock ticks and each pixel of
+ * particular composable gets re-drawn
+ *
+ * Q)- In layout inspector it can be observed that the composable over whose modifier
+ * you used this .shimmer extension is getting recomposed every ~16ms
+ *
+ * A)- Layout Inspector shows recomposition because animation state updates every frame. However,
+ * Compose optimizes this by skipping layout and composition work and only re-running the draw phase.
+ * This is expected for animation-driven modifiers like shimmer and does not indicate a
+ * performance issue.
+ *
+ * | Observation                   | Reality |
+ * | ----------------------------- | ------- |
+ * | Inspector shows recomposition | True    |
+ * | Function fully re-runs        | ❌ No    |
+ * | Layout recalculated           | ❌ No    |
+ * | Draw phase updated            | ✅ Yes   |
+ * | Performance issue             | ❌ No    |
+ *
+ * Why Layout Inspector shows “Recomposition”
+ *
+ * Layout Inspector is conservative:
+ *
+ * It reports any invalidation of a recomposition scope
+ * It does NOT differentiate between:
+ * full recomposition and recomposition due to a draw-only invalidation
+ *
+ * Your shimmer composable is NOT:
+ *
+ * Re-measuring
+ *
+ * Re-laying out
+ *
+ * Re-creating child composables
+ *
+ * Re-running expensive logic
+ * **/
 fun Modifier.shimmer(): Modifier = composed {
     val transition = rememberInfiniteTransition(label = "shimmer")
 
