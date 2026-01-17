@@ -20,4 +20,9 @@ interface AnimeDataRepository {
      * **/
     fun fetchAnimeByID(animeId: Int): Flow<AnimeFetchState>
 
+    /**
+     * To sync data from remote server to Room Database through work manager
+     * **/
+    suspend fun syncPopularAnimeList(): Boolean
+
 }

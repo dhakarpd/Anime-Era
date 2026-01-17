@@ -1,6 +1,12 @@
 package com.github.dhakarpd.animeera.data.repo
 
 import android.content.Context
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.github.dhakarpd.animeera.core.worker.SyncWorker
 import com.github.dhakarpd.animeera.data.local.dao.AnimeDao
 import com.github.dhakarpd.animeera.data.local.entity.AnimeEntity
 import com.github.dhakarpd.animeera.data.local.entity.AnimeWithDetailsEntity
@@ -9,6 +15,7 @@ import com.github.dhakarpd.animeera.data.network.service.ApiService
 import com.github.dhakarpd.animeera.domain.model.AnimeFetchState
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import com.github.dhakarpd.animeera.domain.repo.AnimeDataRepository
+import com.github.dhakarpd.animeera.util.Constants
 import com.github.dhakarpd.animeera.util.InternetConnectivityChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -33,10 +40,28 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
         }
     }
 
+    override suspend fun syncPopularAnimeList(): Boolean {
+        if (!InternetConnectivityChecker.isConnectedToInternet(context)) {
+            return false // Or throw an exception
+        }
+        return try {
+            val response = apiService.getPopularAnime()
+            if (response.isSuccessful && response.body() != null) {
+                val animeList = response.body()!!.data
+                animeDao.upsertAnime(convertAnimeDtoListToEntityList(animeList))
+                true // Indicate success
+            } else {
+                false // Indicate failure
+            }
+        } catch (_: Exception) {
+            false // Indicate failure
+        }
+    }
+
     override fun fetchPopularAnimeList(): Flow<SyncStatus> = flow {
         emit(SyncStatus.SYNCING)
         if (InternetConnectivityChecker.isConnectedToInternet(context)) {
-            delay(5000)
+            delay(2000)
             val response = apiService.getPopularAnime()
             if (response.isSuccessful && response.body() != null) {
                 val animeList = response.body()!!.data
@@ -47,6 +72,20 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
             }
         } else {
             emit(SyncStatus.NO_INTERNET_CONNECTION)
+            // To enable offline syncing
+            println("Work manager called")
+            val request = OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
+                )
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                Constants.WORK_REQUEST_NAME,
+                ExistingWorkPolicy.REPLACE,
+                request
+            )
         }
     }.catch {
         emit(SyncStatus.ERROR)
@@ -64,7 +103,7 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
         }
         emit(AnimeFetchState.Syncing)
         if (InternetConnectivityChecker.isConnectedToInternet(context)) {
-            delay(5000)
+            delay(2000)
             val response = apiService.getAnimeById(animeId)
             if (response.isSuccessful && response.body() != null) {
                 val anime = response.body()!!.data

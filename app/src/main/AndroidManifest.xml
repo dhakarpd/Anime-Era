@@ -25,6 +25,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+<!--        The line tools:node="remove" in your manifest is the explicit instruction to the Android -->
+<!--        build tools to remove the default InitializationProvider entry that comes from the -->
+<!--        WorkManager library. This action prevents the automatic, default initialization from -->
+<!--        ever running.-->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
+
+
+<!--        <service-->
+<!--            android:name="androidx.work.impl.background.systemjob.SystemJobService"-->
+<!--            android:exported="false"-->
+<!--            tools:replace="android:exported"-->
+<!--            tools:node="merge" />-->
     </application>
 
 </manifest>
