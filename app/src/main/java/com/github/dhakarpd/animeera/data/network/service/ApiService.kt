@@ -5,6 +5,7 @@ import com.github.dhakarpd.animeera.data.network.model.AnimeDetailedDataDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @GET("top/anime")
@@ -12,4 +13,7 @@ interface ApiService {
 
     @GET("anime/{id}")
     suspend fun getAnimeById(@Path("id") id: Int): Response<AnimeDetailedDataDto>
+
+    @GET("top/anime")
+    suspend fun getPopularAnimeByPage(@Query("page") page: Int): Response<AnimeDataDto>
 }

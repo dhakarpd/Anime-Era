@@ -62,7 +62,7 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
         emit(SyncStatus.SYNCING)
         if (InternetConnectivityChecker.isConnectedToInternet(context)) {
             delay(2000)
-            val response = apiService.getPopularAnime()
+            val response = apiService.getPopularAnimeByPage(page = 1)
             if (response.isSuccessful && response.body() != null) {
                 val animeList = response.body()!!.data
                 animeDao.upsertAnime(convertAnimeDtoListToEntityList(animeList))
