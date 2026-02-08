@@ -24,6 +24,24 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="piyush.dhakar.com"
+                    android:scheme="https"
+                    />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="piyush.dhakar.com"
+                    android:scheme="http"
+                    />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
         </activity>
 
 <!--        The line tools:node="remove" in your manifest is the explicit instruction to the Android -->
