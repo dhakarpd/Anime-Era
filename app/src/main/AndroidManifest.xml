@@ -15,14 +15,38 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AnimeEra">
+        <!-- Single Top added to handle deep links -->
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.AnimeEra">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- adding path prefix is good but not necessary-->
+            <!-- note that the leading "/" is required for pathPrefix-->
+            <intent-filter>
+                <data
+                    android:host="piyush.dhakar.com"
+                    android:scheme="https"
+                    android:pathPrefix="/anime"
+                    />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="piyush.dhakar.com"
+                    android:scheme="http"
+                    android:pathPrefix="/anime"
+                    />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
 
