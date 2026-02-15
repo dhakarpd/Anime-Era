@@ -1,17 +1,22 @@
 package com.github.dhakarpd.animeera.data.repo
 
 import android.content.Context
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.github.dhakarpd.animeera.core.worker.SyncWorker
-import com.github.dhakarpd.animeera.data.local.dao.AnimeDao
+import com.github.dhakarpd.animeera.data.local.AnimeDatabase
 import com.github.dhakarpd.animeera.data.local.entity.AnimeEntity
 import com.github.dhakarpd.animeera.data.local.entity.AnimeWithDetailsEntity
 import com.github.dhakarpd.animeera.data.network.model.AnimeDto
 import com.github.dhakarpd.animeera.data.network.service.ApiService
+import com.github.dhakarpd.animeera.data.paging.AnimeRemoteMediator
 import com.github.dhakarpd.animeera.domain.model.AnimeFetchState
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import com.github.dhakarpd.animeera.domain.repo.AnimeDataRepository
@@ -25,7 +30,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val animeDao: AnimeDao, val context: Context): AnimeDataRepository {
+class AnimeDataRepoImpl @Inject constructor(
+    val apiService: ApiService,
+    val animeDatabase: AnimeDatabase,
+    val context: Context,
+    val internetConnectivityChecker: InternetConnectivityChecker
+): AnimeDataRepository {
+    private val animeDao = animeDatabase.animeDao
     private fun convertAnimeDtoListToEntityList(animeList: List<AnimeDto>): List<AnimeEntity> {
         return animeList.map { animeDto ->
             AnimeEntity(
@@ -40,8 +51,27 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
         }
     }
 
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getAnimePager(): Flow<PagingData<AnimeEntity>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20, // The number of items to load from PagingSource
+                enablePlaceholders = false,
+                maxSize = 100,
+                prefetchDistance = 20
+            ),
+            // The RemoteMediator is the key to fetching from the network
+            remoteMediator = AnimeRemoteMediator(
+                apiService = apiService,
+                animeDatabase = animeDatabase
+            ),
+            // The PagingSourceFactory provides the data from the local database
+            pagingSourceFactory = { animeDao.getAllAnime() }
+        ).flow
+    }
+
     override suspend fun syncPopularAnimeList(): Boolean {
-        if (!InternetConnectivityChecker.isConnectedToInternet(context)) {
+        if (!internetConnectivityChecker.isConnectedToInternet()) {
             return false // Or throw an exception
         }
         return try {
@@ -60,7 +90,7 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
 
     override fun fetchPopularAnimeList(): Flow<SyncStatus> = flow {
         emit(SyncStatus.SYNCING)
-        if (InternetConnectivityChecker.isConnectedToInternet(context)) {
+        if (internetConnectivityChecker.isConnectedToInternet()) {
             delay(2000)
             val response = apiService.getPopularAnimeByPage(page = 1)
             if (response.isSuccessful && response.body() != null) {
@@ -102,7 +132,7 @@ class AnimeDataRepoImpl @Inject constructor(val apiService: ApiService, val anim
             emit(AnimeFetchState.StaleDataFetchFailure(e.message))
         }
         emit(AnimeFetchState.Syncing)
-        if (InternetConnectivityChecker.isConnectedToInternet(context)) {
+        if (internetConnectivityChecker.isConnectedToInternet()) {
             delay(2000)
             val response = apiService.getAnimeById(animeId)
             if (response.isSuccessful && response.body() != null) {

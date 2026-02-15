@@ -1,5 +1,9 @@
 package com.github.dhakarpd.animeera.presentation.animeList
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,9 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,23 +26,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import com.github.dhakarpd.animeera.presentation.common.shimmer
-
 @Composable
 fun AnimeListScreen(
     animeListScreenViewModel: AnimeListScreenViewModel = hiltViewModel(),
     onAnimeClick: (Int) -> Unit
 ) {
-    val animeList = animeListScreenViewModel.animeList.collectAsState()
+    val animePagingItems = animeListScreenViewModel.animePager.collectAsLazyPagingItems()
     val syncStatus = animeListScreenViewModel.syncStatus.collectAsState()
-
-//    println("Anime List: ${animeList.value}")
-//    println("Sync Status: ${syncStatus.value}")
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -52,22 +58,69 @@ fun AnimeListScreen(
         ) {
             Text("Anime List")
             if (syncStatus.value == SyncStatus.SYNCING) {
+                val infiniteTransition = rememberInfiniteTransition(label = "sync-rotation")
+                val angle by infiniteTransition.animateFloat(
+                    initialValue = 0f,
+                    targetValue = 360f,
+                    animationSpec = infiniteRepeatable(animation = tween(1000)),
+                    label = "sync-angle"
+                )
                 Icon(
                     imageVector = Icons.Outlined.Refresh,
-                    contentDescription = "Sync"
+                    contentDescription = "Syncing",
+                    modifier = Modifier.rotate(angle)
                 )
             }
         }
-        LazyColumn {
-            if (animeList.value.isNotEmpty()) {
-                items(animeList.value) { anime ->
-                    AnimeListItem(anime = anime, onClick = {
-                        onAnimeClick(anime.id)
-                    })
-                }
-            } else {
+
+        val isInitialLoad = animePagingItems.loadState.refresh is LoadState.Loading
+        val isListEmptyAfterLoad = animePagingItems.loadState.refresh is LoadState.NotLoading && animePagingItems.itemCount == 0
+
+        if (isInitialLoad) {
+            LazyColumn {
                 items(8) {
                     AnimeListItemShimmer()
+                }
+            }
+
+        } else if (isListEmptyAfterLoad) {
+            FullScreenError(message = "Could not fetch data. Please check your internet connection and try again.") {
+                animePagingItems.refresh()
+            }
+        } else {
+            LazyColumn {
+                items(animePagingItems.itemCount) { index ->
+                    val anime = animePagingItems[index]
+                    if (anime != null) {
+                        AnimeListItem(anime = anime, onClick = {
+                            onAnimeClick(anime.id)
+                        })
+                    }
+                }
+                item {
+                    when (val appendLoadState = animePagingItems.loadState.append) {
+                        is LoadState.Loading -> {
+                            AnimeListItemShimmer()
+                        }
+                        is LoadState.Error -> {
+                            // This state is less likely with your mediator, but good to handle.
+                            // Could show a small retry button at the bottom of the list.
+                            Text(
+                                text = "Unable to fetch data.",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                        is LoadState.NotLoading -> {
+                            if (appendLoadState.endOfPaginationReached && animePagingItems.itemCount > 0) {
+                                Text(
+                                    text = "You've reached the end!",
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -151,6 +204,22 @@ fun AnimeListItemShimmer() {
                         .height(16.dp)
                         .shimmer()
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun FullScreenError(message: String, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Text(text = message, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = onRetry) {
+                Text("Retry")
             }
         }
     }
