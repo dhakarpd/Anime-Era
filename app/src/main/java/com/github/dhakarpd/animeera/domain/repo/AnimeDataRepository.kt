@@ -1,5 +1,8 @@
 package com.github.dhakarpd.animeera.domain.repo
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.PagingData
+import com.github.dhakarpd.animeera.data.local.entity.AnimeEntity
 import com.github.dhakarpd.animeera.domain.model.AnimeFetchState
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import kotlinx.coroutines.flow.Flow
@@ -25,4 +28,6 @@ interface AnimeDataRepository {
      * **/
     suspend fun syncPopularAnimeList(): Boolean
 
+    @OptIn(ExperimentalPagingApi::class)
+    fun getAnimePager(): Flow<PagingData<AnimeEntity>>
 }

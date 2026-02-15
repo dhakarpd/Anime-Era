@@ -5,11 +5,12 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.annotation.RequiresPermission
+import javax.inject.Inject
 
-object InternetConnectivityChecker {
+class InternetConnectivityChecker @Inject constructor(val context: Context){
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    fun isConnectedToInternet(context: Context) : Boolean {
+    fun isConnectedToInternet() : Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 

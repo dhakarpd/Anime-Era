@@ -1,5 +1,6 @@
 package com.github.dhakarpd.animeera.data.local.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -19,7 +20,11 @@ interface AnimeDao {
     suspend fun deleteAnime(anime: AnimeEntity)
 
     @Query("SELECT * FROM anime_entity")
-    fun getAllAnime(): Flow<List<AnimeEntity>>
+    fun getAllAnime(): PagingSource<Int, AnimeEntity>
+
+    // 2. Add a function to clear the table. This is needed by the RemoteMediator for a full refresh.
+    @Query("DELETE FROM anime_entity")
+    suspend fun clearAllAnime()
 
 //    @Query("SELECT * FROM anime_entity WHERE id = :id")
 //    suspend fun getAnimeById(id: Int): AnimeEntity?

@@ -110,4 +110,10 @@ dependencies {
 
     implementation(libs.work.runtime)
     implementation(libs.androidx.hilt.work)
+
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
+    // This is needed for RemoteMediator
+    implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.paging.common.ktx)
 }
