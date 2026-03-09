@@ -1,0 +1,15 @@
+<!-- app/src/main/res/values-hi/strings.xml -->
+<resources>
+    <string name="app_name">एनीमे एरा</string>
+    <string name="anime_list_title">एनीमे सूची</string>
+    <string name="syncing_desc">सिंक हो रहा है</string>
+    <string name="episodes_label">एपिसोड: %1$s</string>
+    <string name="rating_label">रेटिंग: %1$s</string>
+    <string name="not_available">उपलब्ध नहीं</string>
+    <string name="error_fetch_data">डेटा प्राप्त नहीं किया जा सका। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।</string>
+    <string name="error_generic">डेटा प्राप्त करने में असमर्थ।</string>
+    <string name="end_of_list">आप अंत तक पहुँच चुके हैं!</string>
+    <string name="retry_button">पुनः प्रयास करें</string>
+    <string name="label_genres">शैलियाँ: %1$s</string>
+    <string name="label_cast">कलाकार: %1$s</string>
+</resources>

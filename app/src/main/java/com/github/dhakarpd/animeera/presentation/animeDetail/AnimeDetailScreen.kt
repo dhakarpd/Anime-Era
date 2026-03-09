@@ -21,9 +21,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.github.dhakarpd.animeera.R
 
 @Composable
 fun AnimeDetailScreen(animeId: Int, viewModel: AnimeDetailScreenViewModel = hiltViewModel()) {
@@ -95,7 +97,7 @@ fun AnimeDetailScreen(animeId: Int, viewModel: AnimeDetailScreenViewModel = hilt
                 // Genre(s)
                 if (animeDetailState.genres.isNotEmpty()) {
                     Text(
-                        text = "Genres: ${animeDetailState.genres.joinToString(", ")}",
+                        text = stringResource(R.string.label_genres, animeDetailState.genres.joinToString(", ")),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -103,7 +105,7 @@ fun AnimeDetailScreen(animeId: Int, viewModel: AnimeDetailScreenViewModel = hilt
                 // Main Cast
                 if (animeDetailState.cast.isNotEmpty()) {
                     Text(
-                        text = "Cast: ${animeDetailState.cast.joinToString(", ")}",
+                        text = stringResource(R.string.label_cast, animeDetailState.cast.joinToString(", ")),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -112,13 +114,19 @@ fun AnimeDetailScreen(animeId: Int, viewModel: AnimeDetailScreenViewModel = hilt
 
                 // Number of Episodes and Rating
                 Row {
+                    val episodesCount = animeDetailState.numberOfEpisodes?.toString()
+                        ?: stringResource(R.string.not_available)
+
+                    val ratingValue = animeDetailState.rating?.toString()
+                        ?: stringResource(R.string.not_available)
+
                     Text(
-                        text = "Episodes: ${animeDetailState.numberOfEpisodes ?: "N/A"}",
+                        text = stringResource(R.string.episodes_label, episodesCount),
                         style = MaterialTheme.typography.labelLarge
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Rating: ${animeDetailState.rating ?: "N/A"}",
+                        text = stringResource(R.string.rating_label, ratingValue),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }

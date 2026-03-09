@@ -38,6 +38,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import com.github.dhakarpd.animeera.presentation.common.shimmer
+import androidx.compose.ui.res.stringResource
+import com.github.dhakarpd.animeera.R // Ensure you import your R file
 @Composable
 fun AnimeListScreen(
     animeListScreenViewModel: AnimeListScreenViewModel = hiltViewModel(),
@@ -56,7 +58,7 @@ fun AnimeListScreen(
                 .padding(horizontal = 12.dp, vertical = 4.dp)
                 .height(24.dp)
         ) {
-            Text("Anime List")
+            Text(stringResource(R.string.anime_list_title))
             if (syncStatus.value == SyncStatus.SYNCING) {
                 val infiniteTransition = rememberInfiniteTransition(label = "sync-rotation")
                 val angle by infiniteTransition.animateFloat(
@@ -67,7 +69,7 @@ fun AnimeListScreen(
                 )
                 Icon(
                     imageVector = Icons.Outlined.Refresh,
-                    contentDescription = "Syncing",
+                    contentDescription = stringResource(R.string.syncing_desc),
                     modifier = Modifier.rotate(angle)
                 )
             }
@@ -84,7 +86,7 @@ fun AnimeListScreen(
             }
 
         } else if (isListEmptyAfterLoad) {
-            FullScreenError(message = "Could not fetch data. Please check your internet connection and try again.") {
+            FullScreenError(message = stringResource(R.string.error_fetch_data)) {
                 animePagingItems.refresh()
             }
         } else {
@@ -106,7 +108,7 @@ fun AnimeListScreen(
                             // This state is less likely with your mediator, but good to handle.
                             // Could show a small retry button at the bottom of the list.
                             Text(
-                                text = "Unable to fetch data.",
+                                text = stringResource(R.string.error_generic),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(16.dp)
                             )
@@ -114,7 +116,7 @@ fun AnimeListScreen(
                         is LoadState.NotLoading -> {
                             if (appendLoadState.endOfPaginationReached && animePagingItems.itemCount > 0) {
                                 Text(
-                                    text = "You've reached the end!",
+                                    text = stringResource(R.string.end_of_list),
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(16.dp)
                                 )
@@ -133,6 +135,8 @@ fun AnimeListItem(
     anime: com.github.dhakarpd.animeera.domain.model.Anime,
     onClick: () -> Unit
 ) {
+    val episodes = anime.numberOfEpisodes?.toString() ?: stringResource(R.string.not_available)
+    val rating = anime.rating?.toString() ?: stringResource(R.string.not_available)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,11 +158,11 @@ fun AnimeListItem(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "Episodes: ${anime.numberOfEpisodes ?: "N/A"}",
+                    text = stringResource(R.string.episodes_label, episodes),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "Rating: ${anime.rating ?: "N/A"}",
+                    text = stringResource(R.string.rating_label, rating),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -219,7 +223,7 @@ fun FullScreenError(message: String, onRetry: () -> Unit) {
             Text(text = message, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(8.dp))
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(R.string.retry_button))
             }
         }
     }
