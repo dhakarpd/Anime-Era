@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,6 +40,8 @@ import coil.compose.AsyncImage
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import com.github.dhakarpd.animeera.presentation.common.shimmer
 import androidx.compose.ui.res.stringResource
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.github.dhakarpd.animeera.R // Ensure you import your R file
 @Composable
 fun AnimeListScreen(
@@ -94,7 +97,10 @@ fun AnimeListScreen(
                 items(animePagingItems.itemCount) { index ->
                     val anime = animePagingItems[index]
                     if (anime != null) {
-                        AnimeListItem(anime = anime, onClick = {
+                        AnimeListItem(
+                            anime = anime,
+                            isOnline = animeListScreenViewModel.getDeviceOnlineStatus(),
+                            onClick = {
                             onAnimeClick(anime.id)
                         })
                     }
@@ -133,6 +139,7 @@ fun AnimeListScreen(
 @Composable
 fun AnimeListItem(
     anime: com.github.dhakarpd.animeera.domain.model.Anime,
+    isOnline: Boolean,
     onClick: () -> Unit
 ) {
     val episodes = anime.numberOfEpisodes?.toString() ?: stringResource(R.string.not_available)
@@ -146,7 +153,19 @@ fun AnimeListItem(
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             AsyncImage(
-                model = anime.posterImageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(anime.posterImageUrl)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    // When Online -> Network requests allowed; Cache can be updated
+                    // When Offline -> No network call; Also disables reading from network layer cache
+                    // But still reads from disk cache
+                    .networkCachePolicy(
+                        if (isOnline) CachePolicy.ENABLED
+                        else CachePolicy.DISABLED
+                    )
+                    .crossfade(true)
+                    .build(),
                 contentDescription = anime.title,
                 modifier = Modifier
                     .size(100.dp)
