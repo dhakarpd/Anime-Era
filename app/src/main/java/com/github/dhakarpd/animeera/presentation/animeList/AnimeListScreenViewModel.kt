@@ -98,10 +98,12 @@ class AnimeListScreenViewModel @Inject constructor(
     // 2. Expose as immutable StateFlow (StateFlow implies replay=1 automatically)
     val syncStatus: StateFlow<SyncStatus> = _syncStatus.asStateFlow()
 
+    private var isDeviceOnline: Boolean = false
+
     init {
         //fetchAnime()
-        val isConnected = ensureAnimeSyncUseCase.execute()
-        if (!isConnected) {
+        isDeviceOnline = ensureAnimeSyncUseCase.execute()
+        if (!isDeviceOnline) {
             viewModelScope.launch {
                 SnackbarController.sendEvent(
                     SnackbarEvent(
@@ -111,6 +113,11 @@ class AnimeListScreenViewModel @Inject constructor(
             }
         }
     }
+
+    fun getDeviceOnlineStatus(): Boolean {
+        return isDeviceOnline
+    }
+
     private fun fetchAnime() {
         viewModelScope.launch {
             repository.fetchPopularAnimeList()
