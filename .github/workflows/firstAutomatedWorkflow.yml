@@ -50,14 +50,23 @@ jobs:
             exit 1
           fi
 
-          # Extract total covered and missed lines
-          COVERED=$(grep '<counter type="LINE"' $FILE | sed -E 's/.*covered="([0-9]+)".*/\1/' | awk '{s+=$1} END {print s}')
-          MISSED=$(grep '<counter type="LINE"' $FILE | sed -E 's/.*missed="([0-9]+)".*/\1/' | awk '{s+=$1} END {print s}')
+          # Target only the final summary counter for LINE
+          # grep -o extracts only the matching part, avoiding greedy matching issues on lines with multiple counters
+          # tail -1 ensures we get the report-level summary at the end of the file
+          LINE_COUNTER=$(grep -o '<counter type="LINE" missed="[0-9]*" covered="[0-9]*"/>' $FILE | tail -1)
+          
+          if [ -z "$LINE_COUNTER" ]; then
+            echo "No line coverage data found"
+            exit 1
+          fi
+
+          COVERED=$(echo $LINE_COUNTER | sed -E 's/.*covered="([0-9]+)".*/\1/')
+          MISSED=$(echo $LINE_COUNTER | sed -E 's/.*missed="([0-9]+)".*/\1/')
 
           TOTAL=$((COVERED + MISSED))
 
           if [ "$TOTAL" -eq 0 ]; then
-            echo "No coverage data found"
+            echo "Total lines is 0, cannot calculate coverage"
             exit 1
           fi
 
