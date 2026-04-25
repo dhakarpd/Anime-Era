@@ -45,10 +45,23 @@ jobs:
             exit 1
           fi
 
-          LINE_RATE=$(grep -o 'line-rate="[0-9.]*"' $FILE | head -1 | cut -d'"' -f2)
-          COVERAGE=$(echo "$LINE_RATE * 100" | bc)
+          # Extract total covered and missed lines
+          COVERED=$(grep '<counter type="LINE"' $FILE | sed -E 's/.*covered="([0-9]+)".*/\1/' | awk '{s+=$1} END {print s}')
+          MISSED=$(grep '<counter type="LINE"' $FILE | sed -E 's/.*missed="([0-9]+)".*/\1/' | awk '{s+=$1} END {print s}')
 
+          TOTAL=$((COVERED + MISSED))
+
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "No coverage data found"
+            exit 1
+          fi
+
+          COVERAGE=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
+
+          echo "Covered: $COVERED"
+          echo "Missed: $MISSED"
           echo "Coverage: $COVERAGE%"
+
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
 
       # ✅ Comment on PR (auto update, no spam)
