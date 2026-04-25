@@ -30,11 +30,15 @@ jobs:
       - name: Run Tests and JaCoCo
         run: ./gradlew testDebugUnitTest jacocoTestReport
 
+      - name: Debug coverage file
+        run: |
+          cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml | head -20
+
       # ✅ Extract coverage from JaCoCo XML
       - name: Extract coverage
         id: coverage
         run: |
-          FILE=app/build/reports/jacoco/jacocoTestReport/xml/jacocoTestReport.xml
+          FILE=app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
           if [ ! -f "$FILE" ]; then
             echo "Coverage report not found!"
