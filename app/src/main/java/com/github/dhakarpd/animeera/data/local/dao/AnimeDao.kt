@@ -26,6 +26,9 @@ interface AnimeDao {
     @Query("DELETE FROM anime_entity")
     suspend fun clearAllAnime()
 
+    @Query("SELECT COUNT(*) FROM anime_entity")
+    suspend fun getAnimeCount(): Int
+
 //    @Query("SELECT * FROM anime_entity WHERE id = :id")
 //    suspend fun getAnimeById(id: Int): AnimeEntity?
 

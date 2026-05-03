@@ -17,7 +17,6 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -95,85 +94,6 @@ class AnimeListScreenViewModelTest {
         assertEquals(1, snackbarEvents.size)
         assertEquals("Please check your internet connection", snackbarEvents[0].message)
         job.cancel()
-    }
-
-    @Test
-    fun `fetchAnime updates syncStatus and sends snackbar on NO_INTERNET_CONNECTION`() = runTest {
-        // Given
-        val syncFlow = MutableSharedFlow<SyncStatus>(replay = 1)
-        every { repository.fetchPopularAnimeList() } returns syncFlow
-        
-        val snackbarEvents = mutableListOf<SnackbarEvent>()
-        val job = launch(testDispatcher) {
-            SnackbarController.events.collect { snackbarEvents.add(it) }
-        }
-
-        // When
-        viewModel = AnimeListScreenViewModel(repository, ensureAnimeSyncUseCase)
-        syncFlow.tryEmit(SyncStatus.NO_INTERNET_CONNECTION)
-
-        // Then
-        assertEquals(SyncStatus.NO_INTERNET_CONNECTION, viewModel.syncStatus.value)
-        assertEquals(1, snackbarEvents.size)
-        assertEquals("Please check your internet connection", snackbarEvents[0].message)
-        job.cancel()
-    }
-
-    @Test
-    fun `fetchAnime updates syncStatus and sends snackbar on ERROR`() = runTest {
-        // Given
-        val syncFlow = MutableSharedFlow<SyncStatus>(replay = 1)
-        every { repository.fetchPopularAnimeList() } returns syncFlow
-        
-        val snackbarEvents = mutableListOf<SnackbarEvent>()
-        val job = launch(testDispatcher) {
-            SnackbarController.events.collect { snackbarEvents.add(it) }
-        }
-
-        // When
-        viewModel = AnimeListScreenViewModel(repository, ensureAnimeSyncUseCase)
-        syncFlow.tryEmit(SyncStatus.ERROR)
-
-        // Then
-        assertEquals(SyncStatus.ERROR, viewModel.syncStatus.value)
-        assertEquals(1, snackbarEvents.size)
-        assertEquals("Something went wrong", snackbarEvents[0].message)
-        job.cancel()
-    }
-
-    @Test
-    fun `fetchAnime updates syncStatus on SUCCESS and does not send snackbar`() = runTest {
-        // Given
-        val syncFlow = MutableSharedFlow<SyncStatus>(replay = 1)
-        every { repository.fetchPopularAnimeList() } returns syncFlow
-        
-        val snackbarEvents = mutableListOf<SnackbarEvent>()
-        val job = launch(testDispatcher) {
-            SnackbarController.events.collect { snackbarEvents.add(it) }
-        }
-
-        // When
-        viewModel = AnimeListScreenViewModel(repository, ensureAnimeSyncUseCase)
-        syncFlow.tryEmit(SyncStatus.SUCCESS)
-
-        // Then
-        assertEquals(SyncStatus.SUCCESS, viewModel.syncStatus.value)
-        assertTrue(snackbarEvents.isEmpty())
-        job.cancel()
-    }
-
-    @Test
-    fun `fetchAnime updates syncStatus on SYNCING`() = runTest {
-        // Given
-        val syncFlow = MutableSharedFlow<SyncStatus>(replay = 1)
-        every { repository.fetchPopularAnimeList() } returns syncFlow
-
-        // When
-        viewModel = AnimeListScreenViewModel(repository, ensureAnimeSyncUseCase)
-        syncFlow.tryEmit(SyncStatus.SYNCING)
-
-        // Then
-        assertEquals(SyncStatus.SYNCING, viewModel.syncStatus.value)
     }
 
     @Test

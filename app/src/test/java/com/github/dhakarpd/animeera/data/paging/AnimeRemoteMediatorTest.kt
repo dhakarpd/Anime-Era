@@ -157,9 +157,29 @@ class AnimeRemoteMediatorTest {
     }
 
     @Test
-    fun `load returns Success when IOException occurs`() = runTest {
+    fun `load returns Error when IOException occurs and database is empty`() = runTest {
         // Given
         coEvery { apiService.getPopularAnimeByPage(any()) } throws java.io.IOException()
+        coEvery { animeDao.getAnimeCount() } returns 0
+
+        // When
+        val pagingState = PagingState<Int, AnimeEntity>(
+            pages = listOf(),
+            anchorPosition = null,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0
+        )
+        val result = remoteMediator.load(LoadType.REFRESH, pagingState)
+
+        // Then
+        assertTrue(result is RemoteMediator.MediatorResult.Error)
+    }
+
+    @Test
+    fun `load returns Success when IOException occurs and database is not empty`() = runTest {
+        // Given
+        coEvery { apiService.getPopularAnimeByPage(any()) } throws java.io.IOException()
+        coEvery { animeDao.getAnimeCount() } returns 5
 
         // When
         val pagingState = PagingState<Int, AnimeEntity>(
@@ -176,10 +196,31 @@ class AnimeRemoteMediatorTest {
     }
 
     @Test
-    fun `load returns Success when HttpException occurs`() = runTest {
+    fun `load returns Error when HttpException occurs and database is empty`() = runTest {
         // Given
         val httpException = mockk<retrofit2.HttpException>(relaxed = true)
         coEvery { apiService.getPopularAnimeByPage(any()) } throws httpException
+        coEvery { animeDao.getAnimeCount() } returns 0
+
+        // When
+        val pagingState = PagingState<Int, AnimeEntity>(
+            pages = listOf(),
+            anchorPosition = null,
+            config = PagingConfig(pageSize = 20),
+            leadingPlaceholderCount = 0
+        )
+        val result = remoteMediator.load(LoadType.REFRESH, pagingState)
+
+        // Then
+        assertTrue(result is RemoteMediator.MediatorResult.Error)
+    }
+
+    @Test
+    fun `load returns Success when HttpException occurs and database is not empty`() = runTest {
+        // Given
+        val httpException = mockk<retrofit2.HttpException>(relaxed = true)
+        coEvery { apiService.getPopularAnimeByPage(any()) } throws httpException
+        coEvery { animeDao.getAnimeCount() } returns 10
 
         // When
         val pagingState = PagingState<Int, AnimeEntity>(
