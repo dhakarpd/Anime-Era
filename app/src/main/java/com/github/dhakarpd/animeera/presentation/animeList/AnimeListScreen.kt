@@ -78,8 +78,9 @@ fun AnimeListScreen(
             }
         }
 
-        val isInitialLoad = animePagingItems.loadState.refresh is LoadState.Loading
-        val isListEmptyAfterLoad = animePagingItems.loadState.refresh is LoadState.NotLoading && animePagingItems.itemCount == 0
+        val loadState = animePagingItems.loadState
+        val isInitialLoad = loadState.refresh is LoadState.Loading
+        val isError = loadState.refresh is LoadState.Error && animePagingItems.itemCount == 0
 
         if (isInitialLoad) {
             LazyColumn {
@@ -88,7 +89,7 @@ fun AnimeListScreen(
                 }
             }
 
-        } else if (isListEmptyAfterLoad) {
+        } else if (isError) {
             FullScreenError(message = stringResource(R.string.error_fetch_data)) {
                 animePagingItems.refresh()
             }

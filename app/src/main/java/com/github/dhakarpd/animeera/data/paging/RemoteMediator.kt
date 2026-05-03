@@ -78,15 +78,22 @@ class AnimeRemoteMediator(
 
         } catch (e: IOException) {
             // IOException means no network connection.
-            // Tell the Paging library the mediation succeeded and no more pages can be loaded.
-            // This allows the UI to display the cached data from Room.
             println("Offline Support: No network connection. - $e")
-            MediatorResult.Success(endOfPaginationReached = true)
+            val isEmpty = animeDao.getAnimeCount() == 0
+            if (isEmpty) {
+                MediatorResult.Error(e)
+            } else {
+                MediatorResult.Success(endOfPaginationReached = true)
+            }
         } catch (e: HttpException) {
             // HttpException for non-2xx responses.
-            // Treat this the same as no network: stop this remote load attempt.
             println("Offline Support: HTTP error. - $e")
-            MediatorResult.Success(endOfPaginationReached = true)
+            val isEmpty = animeDao.getAnimeCount() == 0
+            if (isEmpty) {
+                MediatorResult.Error(e)
+            } else {
+                MediatorResult.Success(endOfPaginationReached = true)
+            }
         }
     }
 }

@@ -11,6 +11,11 @@ import com.github.dhakarpd.animeera.domain.repo.SyncScheduler
 import com.github.dhakarpd.animeera.util.Constants
 import javax.inject.Inject
 
+/**
+ * TODO: If it's for a production app: It's usually better to verify this via an
+ * Integration Test (in androidTest) using WorkManagerTestInitHelper,
+ * rather than a Unit Test.
+ * **/
 class WorkManagerSyncScheduler @Inject constructor(
     private val context: Context
 ) : SyncScheduler {

@@ -30,7 +30,20 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "android/**/*.*",
         "**/*Hilt*.*",
         "**/*_Factory.*",
-        "**/*_MembersInjector.*"
+        "**/*_MembersInjector.*",
+        "**/*ComposableSingletons*.*",
+        "**/domain/model/**",
+        "**/data/local/entity/**",
+        "**/data/network/model/**",
+        "**/core/AnimeEra.*",
+        "**/di/**",                  // Excludes all Hilt Modules
+        "**/ui/theme/**",
+        "**/presentation/navigation/**",
+        "**/presentation/common/**",
+        "**/presentation/animeDetail/AnimeDetailScreenKt*.*",
+        "**/presentation/animeDetail/LifecycleAwareVideoPlayerKt*.*",
+        "**/presentation/animeList/AnimeListScreenKt*.*",
+        "**/presentation/MainActivity*.*",
     )
 
     val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
