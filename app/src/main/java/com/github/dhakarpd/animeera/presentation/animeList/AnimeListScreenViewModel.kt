@@ -7,6 +7,7 @@ import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.github.dhakarpd.animeera.R
 import com.github.dhakarpd.animeera.data.local.entity.AnimeEntity
 import com.github.dhakarpd.animeera.domain.model.Anime
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
@@ -14,6 +15,7 @@ import com.github.dhakarpd.animeera.domain.repo.AnimeDataRepository
 import com.github.dhakarpd.animeera.domain.usecase.EnsureAnimeSyncUseCase
 import com.github.dhakarpd.animeera.presentation.common.SnackbarController
 import com.github.dhakarpd.animeera.presentation.common.SnackbarEvent
+import com.github.dhakarpd.animeera.presentation.common.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -107,7 +109,7 @@ class AnimeListScreenViewModel @Inject constructor(
             viewModelScope.launch {
                 SnackbarController.sendEvent(
                     SnackbarEvent(
-                        message = "Please check your internet connection"
+                        message = UiText.StringResource(R.string.error_no_internet)
                     )
                 )
             }
@@ -127,7 +129,7 @@ class AnimeListScreenViewModel @Inject constructor(
                         SyncStatus.NO_INTERNET_CONNECTION -> {
                             SnackbarController.sendEvent(
                                 SnackbarEvent(
-                                    message = "Please check your internet connection"
+                                    message = UiText.StringResource(R.string.error_no_internet)
                                 )
                             )
                         }
@@ -135,7 +137,7 @@ class AnimeListScreenViewModel @Inject constructor(
                         SyncStatus.ERROR -> {
                             SnackbarController.sendEvent(
                                 SnackbarEvent(
-                                    message = "Something went wrong"
+                                    message = UiText.StringResource(R.string.error_something_went_wrong)
                                 )
                             )
                         }

@@ -96,19 +96,51 @@ class AnimeDetailScreenViewModelTest {
     }
 
     @Test
-    fun `getAnimeDetails updates fetchState on SyncFailure`() = runTest {
+    fun `getAnimeDetails updates fetchState and sets error state on SyncFailure with message`() = runTest {
         // Given
         val id = 1
         val state = AnimeFetchState.SyncFailure("Error")
         every { repository.fetchAnimeByID(id) } returns flowOf(state)
-        val initialState = viewModel.animeDetailState.value
 
         // When
         viewModel.getAnimeDetails(id)
 
         // Then
         assertEquals(state, viewModel.fetchState.value)
-        assertEquals(initialState, viewModel.animeDetailState.value)
+        assertEquals(-1, viewModel.animeDetailState.value.animeId)
+    }
+
+    @Test
+    fun `getAnimeDetails updates fetchState and sets error state on DataFetchFailure`() = runTest {
+        // Given
+        val id = 1
+        val state = AnimeFetchState.DataFetchFailure
+        every { repository.fetchAnimeByID(id) } returns flowOf(state)
+
+        // When
+        viewModel.getAnimeDetails(id)
+
+        // Then
+        assertEquals(state, viewModel.fetchState.value)
+        assertEquals(-1, viewModel.animeDetailState.value.animeId)
+    }
+
+    @Test
+    fun `getAnimeDetails keeps stale data on SyncFailure with null message`() = runTest {
+        // Given
+        val id = 1
+        val emissions = listOf(
+            AnimeFetchState.StaleDataFetched(sampleAnime),
+            AnimeFetchState.SyncFailure(null)
+        )
+        every { repository.fetchAnimeByID(id) } returns emissions.asFlow()
+
+        // When
+        viewModel.getAnimeDetails(id)
+
+        // Then
+        assertEquals(AnimeFetchState.SyncFailure(null), viewModel.fetchState.value)
+        assertEquals(sampleAnime, viewModel.animeDetailState.value)
     }
 
     @Test
