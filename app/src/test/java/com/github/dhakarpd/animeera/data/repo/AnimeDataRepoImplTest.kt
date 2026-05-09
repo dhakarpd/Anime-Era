@@ -296,13 +296,14 @@ class AnimeDataRepoImplTest {
         val expected = listOf(
             AnimeFetchState.Loading,
             AnimeFetchState.Syncing,
+            AnimeFetchState.DataFetchFailure,
             AnimeFetchState.NoInternetAvailable
         )
         assertEquals(expected, results)
     }
 
     @Test
-    fun `fetchAnimeByID emits loading, stale failure, syncing and no internet on dao error`() = runTest {
+    fun `fetchAnimeByID emits loading, stale failure, syncing, data failure and no internet on dao error`() = runTest {
         // Arrange
         val animeId = 1
         val errorMessage = "Database Error"
@@ -317,13 +318,14 @@ class AnimeDataRepoImplTest {
             AnimeFetchState.Loading,
             AnimeFetchState.StaleDataFetchFailure(errorMessage),
             AnimeFetchState.Syncing,
+            AnimeFetchState.DataFetchFailure,
             AnimeFetchState.NoInternetAvailable
         )
         assertEquals(expected, results)
     }
 
     @Test
-    fun `fetchAnimeByID emits loading, syncing and sync failure when api response is unsuccessful`() = runTest {
+    fun `fetchAnimeByID emits loading, syncing and data failure when api response is unsuccessful`() = runTest {
         // Arrange
         val animeId = 1
         coEvery { animeDao.getAnimeWithDetailsById(animeId) } returns null
@@ -337,13 +339,13 @@ class AnimeDataRepoImplTest {
         val expected = listOf(
             AnimeFetchState.Loading,
             AnimeFetchState.Syncing,
-            AnimeFetchState.SyncFailure(null)
+            AnimeFetchState.DataFetchFailure
         )
         assertEquals(expected, results)
     }
 
     @Test
-    fun `fetchAnimeByID emits loading, syncing and sync failure when api response body is null`() = runTest {
+    fun `fetchAnimeByID emits loading, syncing and data failure when api response body is null`() = runTest {
         // Arrange
         val animeId = 1
         coEvery { animeDao.getAnimeWithDetailsById(animeId) } returns null
@@ -357,7 +359,7 @@ class AnimeDataRepoImplTest {
         val expected = listOf(
             AnimeFetchState.Loading,
             AnimeFetchState.Syncing,
-            AnimeFetchState.SyncFailure(null)
+            AnimeFetchState.DataFetchFailure
         )
         assertEquals(expected, results)
     }

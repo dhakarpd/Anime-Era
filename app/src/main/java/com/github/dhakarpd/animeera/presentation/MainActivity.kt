@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -60,6 +61,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            val context = LocalContext.current
             val navController = rememberNavController()
             val snackbarHostState = remember {
                 SnackbarHostState()
@@ -74,7 +76,7 @@ class MainActivity : ComponentActivity() {
                     snackbarHostState.currentSnackbarData?.dismiss()
 
                     val result = snackbarHostState.showSnackbar(
-                        message = event.message,
+                        message = event.message.asString(context),
                         actionLabel = event.action?.name,
                         duration = SnackbarDuration.Short
                     )

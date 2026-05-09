@@ -1,7 +1,7 @@
 <!-- app/src/main/res/values-hi/strings.xml -->
 <resources>
     <string name="app_name">एनीमे एरा</string>
-    <string name="anime_list_title">एनीमे सूची</string>
+    <string name="anime_list_title">लोकप्रिय एनीमे</string>
     <string name="syncing_desc">सिंक हो रहा है</string>
     <string name="episodes_label">एपिसोड: %1$s</string>
     <string name="rating_label">रेटिंग: %1$s</string>
@@ -12,4 +12,10 @@
     <string name="retry_button">पुनः प्रयास करें</string>
     <string name="label_genres">शैलियाँ: %1$s</string>
     <string name="label_cast">कलाकार: %1$s</string>
+    <string name="label_main_cast">मुख्य कलाकार</string>
+    <string name="label_synopsis_title">सारांश</string>
+    <string name="error_loading_details">हम विवरण लोड नहीं कर सके</string>
+    <string name="error_connection_issue">ऐसा लगता है कि कनेक्शन की समस्या है। कृपया अपना इंटरनेट जांचें और कुछ देर बाद पुनः प्रयास करें।</string>
+    <string name="error_no_internet">कृपया अपना इंटरनेट कनेक्शन जांचें</string>
+    <string name="error_something_went_wrong">कुछ गलत हो गया</string>
 </resources>

@@ -32,6 +32,15 @@ class AnimeDetailScreenViewModel @Inject constructor(private val repository: Ani
                 is AnimeFetchState.SyncSuccess -> {
                     _animeDetailState.value = state.animeWithDetail
                 }
+                is AnimeFetchState.DataFetchFailure -> {
+                    _animeDetailState.value = AnimeWithDetail(-1, "", 0, 0.0, "", "", emptyList(), emptyList(), "")
+                }
+                is AnimeFetchState.SyncFailure -> {
+                    // Satisfy when stale data not loaded and exception occurred in api call
+                    if (_animeDetailState.value.animeId < 1 && state.message != null) {
+                        _animeDetailState.value = AnimeWithDetail(-1, "", 0, 0.0, "", "", emptyList(), emptyList(), "")
+                    }
+                }
                 else -> Unit
             }
         }.launchIn(viewModelScope)

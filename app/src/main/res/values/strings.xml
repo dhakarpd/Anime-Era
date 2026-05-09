@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Anime Era</string>
-    <string name="anime_list_title">Anime List</string>
+    <string name="anime_list_title">Popular Anime</string>
     <string name="syncing_desc">Syncing</string>
     <string name="episodes_label">Episodes: %1$s</string>
     <string name="rating_label">Rating: %1$s</string>
@@ -9,6 +9,12 @@
     <string name="error_generic">Unable to fetch data.</string>
     <string name="end_of_list">You\'ve reached the end!</string>
     <string name="retry_button">Retry</string>
-    <string name="label_genres">Genres: %1$s</string>
+    <string name="label_genres">Genres</string>
     <string name="label_cast">Cast: %1$s</string>
+    <string name="label_main_cast">Main Cast</string>
+    <string name="label_synopsis_title">Synopsis</string>
+    <string name="error_loading_details">We couldn\'t load the details</string>
+    <string name="error_connection_issue">It seems there\'s a connection issue. Please check your internet and try again in a moment.</string>
+    <string name="error_no_internet">Please check your internet connection</string>
+    <string name="error_something_went_wrong">Something went wrong</string>
 </resources>

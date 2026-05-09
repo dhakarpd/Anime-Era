@@ -18,6 +18,7 @@ import com.github.dhakarpd.animeera.data.network.model.AnimeDto
 import com.github.dhakarpd.animeera.data.network.service.ApiService
 import com.github.dhakarpd.animeera.data.paging.AnimeRemoteMediator
 import com.github.dhakarpd.animeera.domain.model.AnimeFetchState
+import com.github.dhakarpd.animeera.domain.model.AnimeWithDetail
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
 import com.github.dhakarpd.animeera.domain.repo.AnimeDataRepository
 import com.github.dhakarpd.animeera.util.Constants
@@ -123,8 +124,9 @@ class AnimeDataRepoImpl @Inject constructor(
 
     override fun fetchAnimeByID(animeId: Int): Flow<AnimeFetchState> = flow {
         emit(AnimeFetchState.Loading)
+        var staleData : AnimeWithDetail? = null
         try {
-            val staleData = animeDao.getAnimeWithDetailsById(animeId)?.toDomain()
+            staleData = animeDao.getAnimeWithDetailsById(animeId)?.toDomain()
             staleData?.let {
                 emit(AnimeFetchState.StaleDataFetched(it))
             }
@@ -141,9 +143,16 @@ class AnimeDataRepoImpl @Inject constructor(
                 animeDao.upsertAnimeWithDetails(dbInsertionData)
                 emit(AnimeFetchState.SyncSuccess(dbInsertionData.toDomain()))
             } else {
-                emit(AnimeFetchState.SyncFailure(null))
+                if (staleData == null) {
+                    emit(AnimeFetchState.DataFetchFailure)
+                } else {
+                    emit(AnimeFetchState.SyncFailure(null))
+                }
             }
         } else {
+            if (staleData == null) {
+                emit(AnimeFetchState.DataFetchFailure)
+            }
             emit(AnimeFetchState.NoInternetAvailable)
         }
     }.catch {

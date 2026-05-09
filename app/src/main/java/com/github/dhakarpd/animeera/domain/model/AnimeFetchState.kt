@@ -8,4 +8,6 @@ sealed class AnimeFetchState {
     data class SyncSuccess(val animeWithDetail: AnimeWithDetail) : AnimeFetchState()
     data class SyncFailure(val message: String? = null) : AnimeFetchState()
     data object NoInternetAvailable : AnimeFetchState()
+
+    data object DataFetchFailure : AnimeFetchState()
 }

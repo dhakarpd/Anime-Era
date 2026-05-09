@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.PagingDataEvent
 import androidx.paging.PagingDataPresenter
+import com.github.dhakarpd.animeera.R
 import com.github.dhakarpd.animeera.data.local.entity.AnimeEntity
 import com.github.dhakarpd.animeera.domain.model.Anime
 import com.github.dhakarpd.animeera.domain.model.SyncStatus
@@ -11,6 +12,7 @@ import com.github.dhakarpd.animeera.domain.repo.AnimeDataRepository
 import com.github.dhakarpd.animeera.domain.usecase.EnsureAnimeSyncUseCase
 import com.github.dhakarpd.animeera.presentation.common.SnackbarController
 import com.github.dhakarpd.animeera.presentation.common.SnackbarEvent
+import com.github.dhakarpd.animeera.presentation.common.UiText
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -92,7 +94,8 @@ class AnimeListScreenViewModelTest {
         // Then
         assertFalse(viewModel.getDeviceOnlineStatus())
         assertEquals(1, snackbarEvents.size)
-        assertEquals("Please check your internet connection", snackbarEvents[0].message)
+        val message = snackbarEvents[0].message as UiText.StringResource
+        assertEquals(R.string.error_no_internet, message.resId)
         job.cancel()
     }
 
@@ -106,7 +109,7 @@ class AnimeListScreenViewModelTest {
             rating = 9.5,
             posterImageUrl = "http://poster.url",
             timestamp = 0L,
-            isActive = true
+            isActive = true,
         )
 
         every { repository.getAnimePager() } returns flowOf(PagingData.from(listOf(entity)))
